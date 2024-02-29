@@ -46,6 +46,7 @@ class _MyNavigationBarState extends State<MyNavigationBar> {
   final List<Widget> _widgetOptions = <Widget>[
     HomePage(),
     SearchPage(),
+    FavoritesPage(), // Nouvelle page des favoris
   ];
 
   String _currentPageTitle = 'Accueil';
@@ -65,6 +66,9 @@ class _MyNavigationBarState extends State<MyNavigationBar> {
       case 1:
         _currentPageTitle = 'Recherche';
         break;
+      case 2:
+        _currentPageTitle = 'Favoris'; // Titre pour la page des favoris
+        break;
     }
   }
 
@@ -72,23 +76,17 @@ class _MyNavigationBarState extends State<MyNavigationBar> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          _currentPageTitle,
-        ),
+        title: Text(_currentPageTitle),
       ),
       body: Center(
         child: _widgetOptions.elementAt(_selectedIndex),
       ),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Accueil'),
+          BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Recherche'),
           BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Accueil',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.search),
-            label: 'Recherche',
-          ),
+              icon: Icon(Icons.star), label: 'Favoris'), // Icône des favoris
         ],
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
@@ -125,7 +123,7 @@ class SearchPage extends StatefulWidget {
 
 class _SearchPageState extends State<SearchPage> {
   TextEditingController _summonerNameController = TextEditingController();
-  String? _playerInfo;
+  dynamic _playerInfo = null; // Initialiser _playerInfo à null
 
   @override
   Widget build(BuildContext context) {
@@ -169,37 +167,68 @@ class _SearchPageState extends State<SearchPage> {
               ],
             ),
             if (_playerInfo !=
-                null) // Condition pour afficher la carte seulement si _playerInfo n'est pas nulle
+                null) // Afficher seulement si _playerInfo n'est pas null
               Expanded(
                 child: Center(
-                  child: Container(
-                    width: MediaQuery.of(context).size.width * 0.8,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF14323F),
-                      border:
-                          Border.all(color: const Color(0xFFF9B100), width: 1),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        const Icon(Icons.person, size: 50, color: Colors.white),
-                        const SizedBox(height: 8),
-                        Text(
-                          _summonerNameController.text,
-                          style: const TextStyle(
-                              fontSize: 20, color: Colors.white),
-                          textAlign: TextAlign.center,
+                  child: _playerInfo is Widget
+                      ? _playerInfo
+                      : Stack(
+                          children: [
+                            Container(
+                              width: MediaQuery.of(context).size.width * 0.8,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF14323F),
+                                border: Border.all(
+                                    color: const Color(0xFFF9B100), width: 1),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: <Widget>[
+                                  const Icon(Icons.person,
+                                      size: 50, color: Colors.white),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    _summonerNameController.text,
+                                    style: const TextStyle(
+                                        fontSize: 20, color: Colors.white),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    _playerInfo ?? 'Aucune information',
+                                    style: const TextStyle(color: Colors.white),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Positioned(
+                              top: 0,
+                              right: 0,
+                              child: IconButton(
+                                icon: FavoriteService.isFavorite(
+                                        _summonerNameController.text)
+                                    ? Icon(Icons.star, color: Colors.yellow)
+                                    : Icon(Icons.star_border,
+                                        color: Colors.white),
+                                onPressed: () {
+                                  setState(() {
+                                    final summonerName =
+                                        _summonerNameController.text;
+                                    if (FavoriteService.isFavorite(
+                                        summonerName)) {
+                                      FavoriteService.removeFavorite(
+                                          summonerName);
+                                    } else {
+                                      FavoriteService.addFavorite(summonerName);
+                                    }
+                                  });
+                                },
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 4),
-                        Text(
-                          _playerInfo!,
-                          style: const TextStyle(color: Colors.white),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
-                  ),
                 ),
               ),
           ],
@@ -216,8 +245,74 @@ class _SearchPageState extends State<SearchPage> {
       });
     } catch (e) {
       setState(() {
-        _playerInfo = 'Erreur lors de la récupération du rang du joueur';
+        _playerInfo = const Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Icon(Icons.warning, size: 50, color: Colors.red),
+            SizedBox(height: 8),
+            Text('Utilisateur non-trouvé',
+                style: TextStyle(fontSize: 20, color: Colors.black)),
+          ],
+        );
       });
     }
+  }
+}
+
+class FavoriteService {
+  static final Set<String> _favorites = <String>{};
+
+  static Set<String> get favorites => _favorites;
+
+  static void addFavorite(String summonerName) {
+    _favorites.add(summonerName);
+  }
+
+  static void removeFavorite(String summonerName) {
+    _favorites.remove(summonerName);
+  }
+
+  static bool isFavorite(String summonerName) {
+    return _favorites.contains(summonerName);
+  }
+}
+
+class FavoritesPage extends StatefulWidget {
+  @override
+  _FavoritesPageState createState() => _FavoritesPageState();
+}
+
+class _FavoritesPageState extends State<FavoritesPage> {
+  void _updateFavorites() {
+    // Cette fonction vide est juste un prétexte pour utiliser setState
+    setState(() {
+      // setState va forcer l'interface à se redessiner
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final favorites = FavoriteService.favorites;
+
+    return Scaffold(
+      body: favorites.isEmpty
+          ? Center(child: Text('Aucun favori ajouté.'))
+          : ListView.builder(
+              itemCount: favorites.length,
+              itemBuilder: (context, index) {
+                final summonerName = favorites.elementAt(index);
+                return ListTile(
+                  title: Text(summonerName),
+                  trailing: IconButton(
+                    icon: Icon(Icons.delete),
+                    onPressed: () {
+                      FavoriteService.removeFavorite(summonerName);
+                      _updateFavorites(); // Mise à jour des favoris
+                    },
+                  ),
+                );
+              },
+            ),
+    );
   }
 }

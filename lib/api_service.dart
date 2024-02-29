@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 Future<String> fetchSummonerRank(String summonerName) async {
-  final String apiKey = 'RGAPI-274cf6df-0a89-46a1-b047-7204996bbf64';
+  final String apiKey = 'RGAPI-1c8e506b-cd67-4402-81f0-39f7d3639c45';
   final String region = 'euw1';
 
   final encodedSummonerName = Uri.encodeComponent(summonerName);
