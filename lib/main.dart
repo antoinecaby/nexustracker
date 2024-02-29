@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'api_service.dart'; // Importez votre fichier api_service.dart
+import 'api_service.dart';
 
 void main() {
   runApp(MyApp());
@@ -13,12 +13,10 @@ class MyApp extends StatelessWidget {
       title: '3C Tracker',
       theme: ThemeData(
         primaryColor: const Color(0xFF14323F),
-        scaffoldBackgroundColor:
-            const Color(0xFFE9EDF0), // Couleur de fond globale
+        scaffoldBackgroundColor: const Color(0xFFE9EDF0),
         appBarTheme: const AppBarTheme(
-          color: Color(0xFFE9EDF0), // Couleur de fond de AppBar
-          foregroundColor:
-              Color(0xFF14323F), // Couleur des icônes et du texte dans AppBar
+          color: Color(0xFFE9EDF0),
+          foregroundColor: Color(0xFF14323F),
         ),
         bottomNavigationBarTheme: const BottomNavigationBarThemeData(
           backgroundColor: Color(0xFFE9EDF0),
@@ -28,7 +26,6 @@ class MyApp extends StatelessWidget {
         textTheme: const TextTheme(
           bodyText1: TextStyle(color: Color(0xFF14323F)),
           bodyText2: TextStyle(color: Color(0xFF14323F)),
-          // Ajoutez d'autres styles de texte selon vos besoins
         ),
       ),
       home: MyNavigationBar(),
@@ -46,7 +43,7 @@ class _MyNavigationBarState extends State<MyNavigationBar> {
   final List<Widget> _widgetOptions = <Widget>[
     HomePage(),
     SearchPage(),
-    FavoritesPage(), // Nouvelle page des favoris
+    FavoritesPage(),
   ];
 
   String _currentPageTitle = 'Accueil';
@@ -67,7 +64,7 @@ class _MyNavigationBarState extends State<MyNavigationBar> {
         _currentPageTitle = 'Recherche';
         break;
       case 2:
-        _currentPageTitle = 'Favoris'; // Titre pour la page des favoris
+        _currentPageTitle = 'Favoris';
         break;
     }
   }
@@ -85,8 +82,7 @@ class _MyNavigationBarState extends State<MyNavigationBar> {
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Accueil'),
           BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Recherche'),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.star), label: 'Favoris'), // Icône des favoris
+          BottomNavigationBarItem(icon: Icon(Icons.star), label: 'Favoris'),
         ],
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
@@ -123,7 +119,7 @@ class SearchPage extends StatefulWidget {
 
 class _SearchPageState extends State<SearchPage> {
   TextEditingController _summonerNameController = TextEditingController();
-  dynamic _playerInfo = null; // Initialiser _playerInfo à null
+  dynamic _playerInfo = null;
 
   @override
   Widget build(BuildContext context) {
@@ -166,8 +162,7 @@ class _SearchPageState extends State<SearchPage> {
                 ),
               ],
             ),
-            if (_playerInfo !=
-                null) // Afficher seulement si _playerInfo n'est pas null
+            if (_playerInfo != null)
               Expanded(
                 child: Center(
                   child: _playerInfo is Widget
@@ -284,10 +279,7 @@ class FavoritesPage extends StatefulWidget {
 
 class _FavoritesPageState extends State<FavoritesPage> {
   void _updateFavorites() {
-    // Cette fonction vide est juste un prétexte pour utiliser setState
-    setState(() {
-      // setState va forcer l'interface à se redessiner
-    });
+    setState(() {});
   }
 
   @override
@@ -307,7 +299,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
                     icon: Icon(Icons.delete),
                     onPressed: () {
                       FavoriteService.removeFavorite(summonerName);
-                      _updateFavorites(); // Mise à jour des favoris
+                      _updateFavorites();
                     },
                   ),
                 );
